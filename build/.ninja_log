@@ -1,0 +1,22 @@
+# ninja log v7
+21	5773	7997071731366968	CMakeFiles/ride_sharing.dir/src/main.cpp.obj	14665c05310e9fcd
+24	527	7996776910241097	CMakeFiles/ride_sharing.dir/src/MatchingEngine.cpp.obj	6b4a2ee06095d3b6
+21	580	7996776910213708	CMakeFiles/ride_sharing.dir/src/Graph.cpp.obj	5629a8a5f0d390db
+5	639	7996777503512453	CMakeFiles/ride_sharing.dir/src/RideManager.cpp.obj	d48438a7bb6bbe19
+5774	6037	7997071788902791	ride_sharing.exe	d78bf8ca05eb3bed
+55	2317	7997081369935034	build.ninja	bdcb924ec6a20fc4
+55	2317	7997081369796150	D:/Personal_Project/Ride/build/cmake_install.cmake	bdcb924ec6a20fc4
+55	2317	7997081369877193	D:/Personal_Project/Ride/build/_deps/crow-build/cmake_install.cmake	bdcb924ec6a20fc4
+27	621	7997081371378673	CMakeFiles/ride_sharing.dir/src/MatchingEngine.cpp.obj	6b4a2ee06095d3b6
+24	859	7997081371378673	CMakeFiles/ride_sharing.dir/src/Graph.cpp.obj	5629a8a5f0d390db
+31	922	7997081371446860	CMakeFiles/ride_sharing.dir/src/RideManager.cpp.obj	d48438a7bb6bbe19
+19	6315	7997081371329976	CMakeFiles/ride_sharing.dir/src/main.cpp.obj	14665c05310e9fcd
+23	287	7997081669162714	ride_sharing.exe	d78bf8ca05eb3bed
+15	7153	7997088789965060	CMakeFiles/ride_sharing.dir/src/main.cpp.obj	14665c05310e9fcd
+7153	7435	7997088861350059	ride_sharing.exe	d78bf8ca05eb3bed
+28	510	7997096344959707	CMakeFiles/ride_sharing.dir/src/MatchingEngine.cpp.obj	6b4a2ee06095d3b6
+31	691	7997096344992716	CMakeFiles/ride_sharing.dir/src/RideManager.cpp.obj	d48438a7bb6bbe19
+23	7452	7997096344892244	CMakeFiles/ride_sharing.dir/src/main.cpp.obj	14665c05310e9fcd
+7453	7724	7997096419232539	ride_sharing.exe	d78bf8ca05eb3bed
+5	7338	7997106959816977	CMakeFiles/ride_sharing.dir/src/main.cpp.obj	14665c05310e9fcd
+7338	7614	7997107033186530	ride_sharing.exe	d78bf8ca05eb3bed

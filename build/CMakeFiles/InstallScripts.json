@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/Personal_Project/Ride/build/cmake_install.cmake",
+		"D:/Personal_Project/Ride/build/_deps/crow-build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
