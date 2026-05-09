@@ -86,7 +86,11 @@ int main() {
 
     CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)([&system](const crow::request& req) {
         if (req.method == crow::HTTPMethod::Options) {
-            return crow::response(204);
+            auto res = crow::response(204);
+            res.add_header("Access-Control-Allow-Origin", "*");
+            res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            res.add_header("Access-Control-Allow-Headers", "Content-Type");
+            return res;
         }
 
         auto body = crow::json::load(req.body);
