@@ -4,7 +4,14 @@
 #include <cstdlib>
 
 int main() {
-    crow::SimpleApp app;
+    crow::App<crow::CORSHandler> app;
+
+    auto& cors = app.get_middleware<crow::CORSHandler>();
+    cors.global()
+        .origin("https://smart-ride-frontend.onrender.com")
+        .methods("GET, POST, OPTIONS"_method)
+        .headers("Content-Type")
+        .max_age(86400);
 
     RideManager system;
 
@@ -52,10 +59,7 @@ int main() {
         }
         crow::json::wvalue res;
         res["drivers"] = crow::json::wvalue::list(driverList);
-        
-        auto response = crow::response(res);
-        response.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
-        return response;
+        return crow::response(res);
     });
 
     CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Get)([&system]() {
@@ -73,21 +77,10 @@ int main() {
         }
         crow::json::wvalue res;
         res["history"] = crow::json::wvalue::list(historyList);
-        
-        auto response = crow::response(res);
-        response.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
-        return response;
+        return crow::response(res);
     });
 
-    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)([&system](const crow::request& req) {
-        if (req.method == crow::HTTPMethod::Options) {
-            auto res = crow::response(200);
-            res.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
-            res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            res.add_header("Access-Control-Allow-Headers", "Content-Type");
-            return res;
-        }
-
+    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post)([&system](const crow::request& req) {
         auto body = crow::json::load(req.body);
         if (!body) return crow::response(400, "Invalid JSON");
 
@@ -116,9 +109,7 @@ int main() {
             res["message"] = result.message;
         }
 
-        auto response = crow::response(res);
-        response.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
-        return response;
+        return crow::response(res);
     });
 
     int port = 9090;
