@@ -4,14 +4,7 @@
 #include <cstdlib>
 
 int main() {
-    crow::App<crow::CORSHandler> app;
-
-    // Configure CORS globally
-    auto& cors = app.get_middleware<crow::CORSHandler>();
-    cors.global()
-        .headers("*")
-        .methods(crow::HTTPMethod::Post, crow::HTTPMethod::Get, crow::HTTPMethod::Options)
-        .origin("*");
+    crow::SimpleApp app;
 
     RideManager system;
 
@@ -61,6 +54,7 @@ int main() {
         res["drivers"] = crow::json::wvalue::list(driverList);
         
         auto response = crow::response(res);
+        response.add_header("Access-Control-Allow-Origin", "*");
         return response;
     });
 
@@ -81,6 +75,7 @@ int main() {
         res["history"] = crow::json::wvalue::list(historyList);
         
         auto response = crow::response(res);
+        response.add_header("Access-Control-Allow-Origin", "*");
         return response;
     });
 
