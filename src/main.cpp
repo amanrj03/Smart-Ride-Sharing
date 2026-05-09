@@ -9,7 +9,6 @@ int main() {
     auto& cors = app.get_middleware<crow::CORSHandler>();
     cors.global()
         .origin("https://smart-ride-frontend.onrender.com")
-        .methods("GET, POST, OPTIONS"_method)
         .headers("Content-Type")
         .max_age(86400);
 
