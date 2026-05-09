@@ -40,16 +40,15 @@ int main() {
     system.addDriver({"D4", "Varun", "H", true});
     system.addDriver({"D5", "Amit", "J", true});
 
-    CROW_ROUTE(app, "/").methods(crow::HTTPMethod::Get)([]() {
+    CROW_ROUTE(app, "/").methods("GET"_method)([]() {
         return "Smart Ride-Sharing Backend is running.";
     });
 
-    // Single handler per route accepting all needed methods
-    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)
+    CROW_ROUTE(app, "/api/drivers").methods("GET"_method, "OPTIONS"_method)
     ([&system](const crow::request& req) {
         crow::response res;
         addCors(res);
-        if (req.method == crow::HTTPMethod::Options) {
+        if (req.method == "OPTIONS"_method) {
             res.code = 200;
             return res;
         }
@@ -71,11 +70,11 @@ int main() {
         return res;
     });
 
-    CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)
+    CROW_ROUTE(app, "/api/history").methods("GET"_method, "OPTIONS"_method)
     ([&system](const crow::request& req) {
         crow::response res;
         addCors(res);
-        if (req.method == crow::HTTPMethod::Options) {
+        if (req.method == "OPTIONS"_method) {
             res.code = 200;
             return res;
         }
@@ -99,11 +98,11 @@ int main() {
         return res;
     });
 
-    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)
+    CROW_ROUTE(app, "/api/request_ride").methods("POST"_method, "OPTIONS"_method)
     ([&system](const crow::request& req) {
         crow::response res;
         addCors(res);
-        if (req.method == crow::HTTPMethod::Options) {
+        if (req.method == "OPTIONS"_method) {
             res.code = 200;
             return res;
         }
