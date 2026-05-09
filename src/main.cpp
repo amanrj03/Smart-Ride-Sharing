@@ -2,19 +2,13 @@
 #include "RideManager.h"
 #include <cstdlib>
 
-// Adds CORS headers to every response
-void addCorsHeaders(crow::response& res) {
-    res.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
+static const std::string CORS_ORIGIN = "https://smart-ride-frontend.onrender.com";
+
+void addCors(crow::response& res) {
+    res.add_header("Access-Control-Allow-Origin", CORS_ORIGIN);
     res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.add_header("Access-Control-Allow-Headers", "Content-Type, Accept");
     res.add_header("Access-Control-Max-Age", "86400");
-}
-
-// Returns a 200 preflight response with CORS headers
-crow::response preflightResponse() {
-    crow::response res(200);
-    addCorsHeaders(res);
-    return res;
 }
 
 int main() {
@@ -50,68 +44,77 @@ int main() {
         return "Smart Ride-Sharing Backend is running.";
     });
 
-    // OPTIONS preflight handlers
-    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Options)([]() {
-        return preflightResponse();
-    });
-
-    CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Options)([]() {
-        return preflightResponse();
-    });
-
-    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Options)([]() {
-        return preflightResponse();
-    });
-
-    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Get)([&system]() {
+    // Single handler per route accepting all needed methods
+    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)
+    ([&system](const crow::request& req) {
+        crow::response res;
+        addCors(res);
+        if (req.method == crow::HTTPMethod::Options) {
+            res.code = 200;
+            return res;
+        }
         auto drivers = system.getAllDrivers();
         std::vector<crow::json::wvalue> driverList;
         for (const auto& d : drivers) {
-            crow::json::wvalue driverJson;
-            driverJson["id"] = d.driverId;
-            driverJson["name"] = d.name;
-            driverJson["location"] = d.currentLocation;
-            driverJson["available"] = d.isAvailable;
-            driverList.push_back(driverJson);
+            crow::json::wvalue dj;
+            dj["id"] = d.driverId;
+            dj["name"] = d.name;
+            dj["location"] = d.currentLocation;
+            dj["available"] = d.isAvailable;
+            driverList.push_back(std::move(dj));
         }
         crow::json::wvalue body;
         body["drivers"] = crow::json::wvalue::list(driverList);
-        auto res = crow::response(body);
-        addCorsHeaders(res);
+        res.write(body.dump());
+        res.add_header("Content-Type", "application/json");
+        res.code = 200;
         return res;
     });
 
-    CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Get)([&system]() {
+    CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)
+    ([&system](const crow::request& req) {
+        crow::response res;
+        addCors(res);
+        if (req.method == crow::HTTPMethod::Options) {
+            res.code = 200;
+            return res;
+        }
         auto history = system.getRideHistory();
         std::vector<crow::json::wvalue> historyList;
         for (const auto& r : history) {
-            crow::json::wvalue rideJson;
-            rideJson["rideId"] = r.rideId;
-            rideJson["driverId"] = r.driverId;
-            rideJson["pickup"] = r.startLocation;
-            rideJson["destination"] = r.endLocation;
-            rideJson["distance"] = r.distance;
-            rideJson["fare"] = r.fare;
-            historyList.push_back(rideJson);
+            crow::json::wvalue rj;
+            rj["rideId"] = r.rideId;
+            rj["driverId"] = r.driverId;
+            rj["pickup"] = r.startLocation;
+            rj["destination"] = r.endLocation;
+            rj["distance"] = r.distance;
+            rj["fare"] = r.fare;
+            historyList.push_back(std::move(rj));
         }
         crow::json::wvalue body;
         body["history"] = crow::json::wvalue::list(historyList);
-        auto res = crow::response(body);
-        addCorsHeaders(res);
+        res.write(body.dump());
+        res.add_header("Content-Type", "application/json");
+        res.code = 200;
         return res;
     });
 
-    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post)([&system](const crow::request& req) {
-        auto body = crow::json::load(req.body);
-        if (!body) {
-            auto res = crow::response(400, "Invalid JSON");
-            addCorsHeaders(res);
+    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)
+    ([&system](const crow::request& req) {
+        crow::response res;
+        addCors(res);
+        if (req.method == crow::HTTPMethod::Options) {
+            res.code = 200;
             return res;
         }
-
+        auto body = crow::json::load(req.body);
+        if (!body) {
+            res.code = 400;
+            res.write("Invalid JSON");
+            return res;
+        }
         std::string pickup = body["pickup"].s();
         std::string destination = body["destination"].s();
-
         RideResult result = system.processRideRequest(pickup, destination);
 
         crow::json::wvalue resBody;
@@ -124,17 +127,16 @@ int main() {
             resBody["distance"] = result.distance;
             resBody["fare"] = result.fare;
             std::vector<crow::json::wvalue> pathList;
-            for (const auto& node : result.path) {
+            for (const auto& node : result.path)
                 pathList.push_back(crow::json::wvalue(node));
-            }
             resBody["path"] = crow::json::wvalue::list(pathList);
         } else {
             resBody["status"] = "error";
             resBody["message"] = result.message;
         }
-
-        auto res = crow::response(resBody);
-        addCorsHeaders(res);
+        res.write(resBody.dump());
+        res.add_header("Content-Type", "application/json");
+        res.code = 200;
         return res;
     });
 

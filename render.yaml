@@ -12,10 +12,6 @@ services:
     env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://smart-ride-backend-jkeu.onrender.com/api/:splat
     envVars:
       - key: VITE_API_BASE_URL
-        value: ""
+        value: https://smart-ride-backend-jkeu.onrender.com
