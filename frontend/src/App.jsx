@@ -5,8 +5,7 @@ import DriverList from './components/DriverList';
 import RideRequestForm from './components/RideRequestForm';
 import RideStatus from './components/RideStatus';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9090';
-const API_BASE = `${baseUrl}/api`;
+const API_BASE = '/api';
 
 function App() {
   const [drivers, setDrivers] = useState([]);
