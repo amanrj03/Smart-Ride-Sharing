@@ -1,6 +1,7 @@
 #include "crow.h"
 #include "crow/middlewares/cors.h"
 #include "RideManager.h"
+#include <cstdlib>
 
 int main() {
     crow::App<crow::CORSHandler> app;
@@ -113,5 +114,9 @@ int main() {
         return response;
     });
 
-    app.port(9090).multithreaded().run();
+    int port = 9090;
+    if (const char* env_p = std::getenv("PORT")) {
+        port = std::stoi(env_p);
+    }
+    app.port(port).multithreaded().run();
 }
