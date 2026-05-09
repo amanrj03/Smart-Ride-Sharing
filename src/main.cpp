@@ -1,20 +1,27 @@
 #include "crow.h"
-#include "crow/middlewares/cors.h"
 #include "RideManager.h"
 #include <cstdlib>
 
-int main() {
-    crow::App<crow::CORSHandler> app;
+// Adds CORS headers to every response
+void addCorsHeaders(crow::response& res) {
+    res.add_header("Access-Control-Allow-Origin", "https://smart-ride-frontend.onrender.com");
+    res.add_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.add_header("Access-Control-Allow-Headers", "Content-Type, Accept");
+    res.add_header("Access-Control-Max-Age", "86400");
+}
 
-    auto& cors = app.get_middleware<crow::CORSHandler>();
-    cors.global()
-        .origin("https://smart-ride-frontend.onrender.com")
-        .headers("Content-Type")
-        .max_age(86400);
+// Returns a 200 preflight response with CORS headers
+crow::response preflightResponse() {
+    crow::response res(200);
+    addCorsHeaders(res);
+    return res;
+}
+
+int main() {
+    crow::SimpleApp app;
 
     RideManager system;
 
-    // Initialize Map Data (Locations and edges) to match frontend
     system.addLocationEdge("A", "B", 3.0);
     system.addLocationEdge("A", "E", 4.0);
     system.addLocationEdge("B", "C", 3.0);
@@ -33,16 +40,27 @@ int main() {
     system.addLocationEdge("H", "I", 3.0);
     system.addLocationEdge("I", "J", 4.0);
 
-    // Initialize some drivers spread across the new grid
     system.addDriver({"D1", "Rakesh", "A", true});
     system.addDriver({"D2", "Sunil", "D", true});
     system.addDriver({"D3", "Karan", "F", true});
     system.addDriver({"D4", "Varun", "H", true});
     system.addDriver({"D5", "Amit", "J", true});
 
-
     CROW_ROUTE(app, "/").methods(crow::HTTPMethod::Get)([]() {
-        return "Smart Ride-Sharing Backend is running. Please visit the frontend URL to use the application.";
+        return "Smart Ride-Sharing Backend is running.";
+    });
+
+    // OPTIONS preflight handlers
+    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Options)([]() {
+        return preflightResponse();
+    });
+
+    CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Options)([]() {
+        return preflightResponse();
+    });
+
+    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Options)([]() {
+        return preflightResponse();
     });
 
     CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Get)([&system]() {
@@ -56,9 +74,11 @@ int main() {
             driverJson["available"] = d.isAvailable;
             driverList.push_back(driverJson);
         }
-        crow::json::wvalue res;
-        res["drivers"] = crow::json::wvalue::list(driverList);
-        return crow::response(res);
+        crow::json::wvalue body;
+        body["drivers"] = crow::json::wvalue::list(driverList);
+        auto res = crow::response(body);
+        addCorsHeaders(res);
+        return res;
     });
 
     CROW_ROUTE(app, "/api/history").methods(crow::HTTPMethod::Get)([&system]() {
@@ -74,41 +94,48 @@ int main() {
             rideJson["fare"] = r.fare;
             historyList.push_back(rideJson);
         }
-        crow::json::wvalue res;
-        res["history"] = crow::json::wvalue::list(historyList);
-        return crow::response(res);
+        crow::json::wvalue body;
+        body["history"] = crow::json::wvalue::list(historyList);
+        auto res = crow::response(body);
+        addCorsHeaders(res);
+        return res;
     });
 
     CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post)([&system](const crow::request& req) {
         auto body = crow::json::load(req.body);
-        if (!body) return crow::response(400, "Invalid JSON");
+        if (!body) {
+            auto res = crow::response(400, "Invalid JSON");
+            addCorsHeaders(res);
+            return res;
+        }
 
         std::string pickup = body["pickup"].s();
         std::string destination = body["destination"].s();
 
         RideResult result = system.processRideRequest(pickup, destination);
 
-        crow::json::wvalue res;
+        crow::json::wvalue resBody;
         if (result.success) {
-            res["status"] = "success";
-            res["message"] = result.message;
-            res["rideId"] = result.rideId;
-            res["driverId"] = result.driverId;
-            res["driverName"] = result.driverName;
-            res["distance"] = result.distance;
-            res["fare"] = result.fare;
-            
+            resBody["status"] = "success";
+            resBody["message"] = result.message;
+            resBody["rideId"] = result.rideId;
+            resBody["driverId"] = result.driverId;
+            resBody["driverName"] = result.driverName;
+            resBody["distance"] = result.distance;
+            resBody["fare"] = result.fare;
             std::vector<crow::json::wvalue> pathList;
             for (const auto& node : result.path) {
                 pathList.push_back(crow::json::wvalue(node));
             }
-            res["path"] = crow::json::wvalue::list(pathList);
+            resBody["path"] = crow::json::wvalue::list(pathList);
         } else {
-            res["status"] = "error";
-            res["message"] = result.message;
+            resBody["status"] = "error";
+            resBody["message"] = result.message;
         }
 
-        return crow::response(res);
+        auto res = crow::response(resBody);
+        addCorsHeaders(res);
+        return res;
     });
 
     int port = 9090;

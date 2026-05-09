@@ -8,7 +8,7 @@ services:
     dockerContext: .
     buildArgs:
       - key: CACHE_BUST
-        value: "2"
+        value: "3"
 
   - type: web
     name: smart-ride-frontend
