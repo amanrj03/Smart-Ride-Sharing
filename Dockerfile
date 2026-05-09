@@ -14,7 +14,8 @@ WORKDIR /app
 COPY CMakeLists.txt .
 COPY src/ ./src/
 
-# Build the application
+# Build the application (ARG forces cache invalidation when needed)
+ARG CACHE_BUST=1
 RUN mkdir build && cd build && cmake .. && make
 
 # Runtime stage
