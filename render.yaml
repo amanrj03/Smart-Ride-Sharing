@@ -3,6 +3,8 @@ services:
     name: smart-ride-backend
     env: docker
     plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
 
   - type: web
     name: smart-ride-frontend

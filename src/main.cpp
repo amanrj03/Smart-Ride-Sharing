@@ -116,5 +116,5 @@ int main() {
     if (const char* env_p = std::getenv("PORT")) {
         port = std::stoi(env_p);
     }
-    app.port(port).multithreaded().run();
+    app.bindaddr("0.0.0.0").port(port).multithreaded().run();
 }
