@@ -84,7 +84,11 @@ int main() {
         return response;
     });
 
-    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post)([&system](const crow::request& req) {
+    CROW_ROUTE(app, "/api/request_ride").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)([&system](const crow::request& req) {
+        if (req.method == crow::HTTPMethod::Options) {
+            return crow::response(204);
+        }
+
         auto body = crow::json::load(req.body);
         if (!body) return crow::response(400, "Invalid JSON");
 
