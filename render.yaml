@@ -4,8 +4,9 @@ services:
     env: docker
     plan: free
 
-  - type: static
+  - type: web
     name: smart-ride-frontend
+    env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     envVars:
