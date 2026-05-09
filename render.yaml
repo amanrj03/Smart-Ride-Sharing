@@ -5,6 +5,10 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /
+    dockerContext: .
+    buildArgs:
+      - key: CACHE_BUST
+        value: "2"
 
   - type: web
     name: smart-ride-frontend

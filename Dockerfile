@@ -14,8 +14,8 @@ WORKDIR /app
 COPY CMakeLists.txt .
 COPY src/ ./src/
 
-# Build the application (ARG forces cache invalidation when needed)
-ARG CACHE_BUST=1
+# Build the application (timestamp arg busts cache on every deploy)
+ARG CACHE_BUST
 RUN mkdir build && cd build && cmake .. && make
 
 # Runtime stage
@@ -24,6 +24,7 @@ FROM ubuntu:22.04
 # Install only necessary runtime libraries if any
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
