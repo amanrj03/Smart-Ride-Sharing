@@ -42,6 +42,10 @@ int main() {
     system.addDriver({"D5", "Amit", "J", true});
 
 
+    CROW_ROUTE(app, "/").methods(crow::HTTPMethod::Get)([]() {
+        return "Smart Ride-Sharing Backend is running. Please visit the frontend URL to use the application.";
+    });
+
     CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::Get)([&system]() {
         auto drivers = system.getAllDrivers();
         std::vector<crow::json::wvalue> driverList;
